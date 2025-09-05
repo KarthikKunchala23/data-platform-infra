@@ -1,0 +1,53 @@
+executor: KubernetesExecutor
+
+images:
+  airflow:
+    repository: "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/airflow-platform"
+    tag: "2.9.2"
+
+airflow:
+  config:
+    core:
+      load_examples: "False"
+      dags_folder: /opt/airflow/dags
+    logging:
+      remote_logging: "True"
+      remote_log_conn_id: "S3_LOGS"
+      remote_base_log_folder: "s3://${your_org}-dev-airflow-logs" # replace exact bucket
+  fernet_key: ""  # pulled from secrets via ExternalSecret
+  # connections will be set in Secrets/ExternalSecrets
+
+webserver:
+  service:
+    type: ClusterIP
+
+scheduler:
+  replicas: 2
+
+workers:
+  enabled: false
+
+airflowDatabase:
+  enabled: true
+  # For production: disable embedded DB and configure external RDS & secret
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: airflow
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/yourorg-dev-airflow-irsa"
+
+ingress:
+  enabled: true
+  ingressClassName: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+  hosts:
+    - airflow.<DOMAIN>   # replace
+  tls: []
