@@ -1,12 +1,16 @@
-module "ecr" {
-source = "terraform-aws-modules/ecr/aws"
-version = "~> 1.6"
-
-
-repository_name = "airflow-platform"
-repository_image_scan_on_push = true
-repository_encryption_configuration = {
-encryption_type = "KMS"
-kms_key = module.kms_s3.key_arn
+resource "aws_ecr_repository" "this" {
+  name = var.name
+  image_tag_mutability = "MUTABLE"
+  encryption_configuration {
+    encryption_type = var.kms_key_id == "" ? "AES256" : "KMS"
+    kms_key = var.kms_key_id == "" ? null : var.kms_key_id
+  }
+  tags = { Name = var.name }
 }
+
+output "repository_url" {
+  value = aws_ecr_repository.this.repository_url
+}
+output "repository_arn" {
+  value = aws_ecr_repository.this.arn
 }

@@ -1,20 +1,14 @@
-variable "env" {
-  description = "The environment for the deployment (e.g., dev, staging, prod)"
-  type        = string
-  default     = "dev"
-  
+variable "namespace_name" { type = string }
+variable "workgroup_name" { type = string }
+variable "kms_key_id" {
+   type = string
+   description = "KMS Key ID for Redshift encryption"
 }
-
-variable "redshift_admin_username" {
-  description = "The admin username for the Redshift Serverless namespace"
-  type        = string
-  default     = "adminuser"
-  
+variable "subnet_ids" { type = list(string) }
+variable "vpc_id" { type = string }
+variable "ingress_from_security_group_ids" {
+   type = list(string)
+  default = []
 }
-
-variable "redshift_admin_password" {
-  description = "The admin password for the Redshift Serverless namespace"
-  type        = string
-  default     = "ChangeMe123!"
-  
-}
+variable "admin_username" { type = string }
+variable "admin_password" { type = string }

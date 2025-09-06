@@ -1,14 +1,15 @@
-data "aws_caller_identity" "account_id" {
+variable "name" {
+  type = string
 }
-
-variable "account_id" {
-  description = "The AWS account ID where resources will be deployed"
-  type        = string
-  default     = data.aws_caller_identity.account_id.account_id 
+variable "cidr" {
+  type = string
 }
-
-variable "region" {
-  description = "The AWS region to deploy resources in"
-  type        = string
-  default = "us-east-1"
+variable "azs" {
+  type = list(string)
+}
+variable "public_subnets_cidrs" {
+  type = list(string)
+}
+variable "private_subnets_cidrs" {
+  type = list(string)
 }

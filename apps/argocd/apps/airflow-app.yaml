@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   source:
-    repoURL: "https://github.com/your-org/platform.git"
+    repoURL: "https://github.com/KarthikKunchala23/platform.git"
     targetRevision: main
     path: charts/airflow   # point to your chart values or helm chart wrapper in repo
     helm:

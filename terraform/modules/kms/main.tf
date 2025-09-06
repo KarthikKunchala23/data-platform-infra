@@ -1,20 +1,17 @@
-module "kms_s3" {
-source = "terraform-aws-modules/kms/aws"
-version = "~> 3.0"
-
-
-description = "KMS key for S3 data buckets"
-enable_key_rotation = true
-aliases = ["alias/data-plat-s3"]
+resource "aws_kms_key" "this" {
+  description = "KMS key for ${var.name}"
+  enable_key_rotation = true
+  tags = { Name = var.name }
 }
 
+resource "aws_kms_alias" "this" {
+  name = "alias/${var.name}"
+  target_key_id = aws_kms_key.this.key_id
+}
 
-module "kms_redshift" {
-source = "terraform-aws-modules/kms/aws"
-version = "~> 3.0"
-
-
-description = "KMS for Redshift Serverless"
-enable_key_rotation = true
-aliases = ["alias/data-plat-redshift"]
+output "kms_key_id" {
+  value = aws_kms_key.this.id
+}
+output "kms_key_arn" {
+  value = aws_kms_key.this.arn
 }

@@ -1,52 +1,62 @@
-module "airflow_irsa" {
-source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-version = "~> 5.38"
-
-
-role_name_prefix = "airflow-${var.env}-"
-role_policy_arns = [
-aws_iam_policy.airflow_data_access.arn
-]
-oidc_providers = {
-eks = {
-provider_arn = module.eks.oidc_provider_arn
-namespace_service_accounts = [
-"platform:airflow-scheduler",
-"platform:airflow-web",
-"platform:airflow-worker",
-]
-}
-}
+locals {
+  sa_subject = "system:serviceaccount:${var.namespace}:${var.service_account}"
 }
 
+data "aws_iam_policy_document" "assume_oidc" {
+  statement {
+    effect = "Allow"
 
-resource "aws_iam_policy" "airflow_data_access" {
-name = "airflow-data-access-${var.env}"
-description = "Airflow pods access to S3 and Secrets"
+    principals {
+      type        = "Federated"
+      identifiers = [var.oidc_provider_arn]
+    }
 
+    actions = ["sts:AssumeRoleWithWebIdentity"]
 
-policy = jsonencode({
-Version = "2012-10-17",
-Statement = [
-{
-Sid: "S3DataBuckets",
-Effect: "Allow",
-Action: ["s3:GetObject","s3:PutObject","s3:ListBucket"],
-Resource: [
-module.s3["raw"].s3_bucket_arn,
-"${module.s3["raw"].s3_bucket_arn}/*",
-module.s3["configs"].s3_bucket_arn,
-"${module.s3["configs"].s3_bucket_arn}/*",
-module.s3["airflow_logs"].s3_bucket_arn,
-"${module.s3["airflow_logs"].s3_bucket_arn}/*",
-]
-},
-{
-Sid: "SecretsAccess",
-Effect: "Allow",
-Action: ["secretsmanager:GetSecretValue","secretsmanager:DescribeSecret"],
-Resource: ["arn:aws:secretsmanager:${var.region}:${var.account_id}:secret:airflow/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.oidc_provider_arn, "arn:aws:iam::[0-9]+:oidc-provider/", "")}:sub"
+      values   = [local.sa_subject]
+    }
+  }
 }
-]
-})
+
+resource "aws_iam_role" "irsa" {
+  name               = "${var.name_prefix}-role"
+  assume_role_policy = data.aws_iam_policy_document.assume_oidc.json
+  description        = "IRSA role for ${var.name_prefix}"
+}
+
+# Attach S3 and SecretsManager inline policy
+data "aws_iam_policy_document" "airflow_access" {
+  statement {
+    sid    = "S3Access"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:ListBucket"
+    ]
+    resources = concat(var.s3_bucket_arns, [for arn in var.s3_bucket_arns : "${arn}/*"])
+  }
+
+  statement {
+    sid    = "SecretsManagerAccess"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret"
+    ]
+    resources = ["arn:aws:secretsmanager:*:*:secret:airflow/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "airflow_policy" {
+  name   = "${var.name_prefix}-policy"
+  role   = aws_iam_role.irsa.id
+  policy = data.aws_iam_policy_document.airflow_access.json
+}
+
+output "role_arn" {
+  value = aws_iam_role.irsa.arn
 }

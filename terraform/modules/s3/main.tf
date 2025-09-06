@@ -1,39 +1,44 @@
-module "s3" {
-source = "terraform-aws-modules/s3-bucket/aws"
-version = "~> 4.1"
-
-
-for_each = {
-raw = { name = "${var.org}-raw-${var.env}" }
-configs = { name = "${var.org}-configs-${var.env}" }
-airflow_logs = { name = "${var.org}-airflow-logs-${var.env}" }
+resource "aws_s3_bucket" "raw" {
+  bucket = "${var.name_prefix}-raw"
+  acl    = "private"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.kms_key_id
+      }
+    }
+  }
+  versioning { enabled = true }
+  tags = { Name = "${var.name_prefix}-raw" }
 }
 
-
-bucket = each.value.name
-
-
-server_side_encryption_configuration = {
-rule = {
-apply_server_side_encryption_by_default = {
-sse_algorithm = "aws:kms"
-kms_master_key_id = module.kms_s3.key_id
+resource "aws_s3_bucket" "configs" {
+  bucket = "${var.name_prefix}-configs"
+  acl    = "private"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.kms_key_id
+      }
+    }
+  }
+  versioning { enabled = true }
+  tags = { Name = "${var.name_prefix}-configs" }
 }
-}
-}
 
-
-versioning = { enabled = true }
-acl = "private"
-block_public_acls = true
-block_public_policy = true
-ignore_public_acls = true
-restrict_public_buckets = true
-
-
-lifecycle_rule = [{
-id = "expire-mpu"
-enabled = true
-abort_incomplete_multipart_upload_days = 7
-}]
+resource "aws_s3_bucket" "airflow_logs" {
+  bucket = "${var.name_prefix}-airflow-logs"
+  acl    = "private"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.kms_key_id
+      }
+    }
+  }
+  versioning { enabled = true }
+  tags = { Name = "${var.name_prefix}-airflow-logs" }
 }

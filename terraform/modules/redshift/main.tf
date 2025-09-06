@@ -1,17 +1,19 @@
-resource "aws_redshiftserverless_namespace" "this" {
-namespace_name = "data-plat-${var.env}"
-admin_username = var.redshift_admin_username
-admin_user_password = var.redshift_admin_password
-kms_key_id = module.kms_redshift.key_arn
-}
 
+resource "aws_redshiftserverless_namespace" "this" {
+  namespace_name = var.namespace_name
+  admin_username = var.admin_username
+  admin_user_password = var.admin_password
+  kms_key_id = var.kms_key_id
+}
 
 resource "aws_redshiftserverless_workgroup" "this" {
-workgroup_name = "data-plat-${var.env}"
-base_capacity = 16 // RPU; adjust
-namespace_name = aws_redshiftserverless_namespace.this.namespace_name
-enhanced_vpc_routing = true
-publicly_accessible = false
-subnet_ids = module.vpc.private_subnets
-security_group_ids = [module.vpc.default_security_group_id]
+  workgroup_name = var.workgroup_name
+  namespace_name = aws_redshiftserverless_namespace.this.namespace_name
+  base_capacity  = 8
+  enhanced_vpc_routing = true
+  subnet_ids = var.subnet_ids
+  security_group_ids = [aws_security_group.rs_sg.id]
 }
+
+output "namespace_name" { value = aws_redshiftserverless_namespace.this.namespace_name }
+output "workgroup_name" { value = aws_redshiftserverless_workgroup.this.workgroup_name }

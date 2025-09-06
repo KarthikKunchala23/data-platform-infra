@@ -1,53 +1,81 @@
-# VPC
+# Terraform configuration for the dev environment
+# Create VPC
 module "vpc" {
-  source = "../modules/vpc"
-  name   = "dev-vpc"
-  cidr   = "10.0.0.0/16"
-  azs    = ["us-east-1a", "us-east-1b"]
+  source = "../../modules/vpc"
+  name   = var.vpc_name
+  cidr   = var.vpc_cidr
+  azs    = var.azs
+  public_subnets_cidrs  = var.public_subnets_cidrs
+  private_subnets_cidrs = var.private_subnets_cidrs
 }
 
-# EKS
+# KMS keys
+module "kms" {
+  source = "../../modules/kms"
+  name   = "${var.org}-${var.env}"
+}
+
+# S3 buckets
+module "s3_data" {
+  source = "../../modules/s3"
+  name_prefix = var.s3_prefix
+  kms_key_id  = module.kms.kms_key_id
+}
+
+# ECR
+module "ecr" {
+  source = "../../modules/ecr"
+  name   = var.ecr_repo_name
+  kms_key_id = module.kms.kms_key_id
+}
+
+# EKS cluster + node group
 module "eks" {
-  source          = "../modules/eks"
-  cluster_name    = "dev-eks"
+  source          = "../../modules/eks"
+  cluster_name    = var.cluster_name
   vpc_id          = module.vpc.vpc_id
   private_subnets = module.vpc.private_subnets
   public_subnets  = module.vpc.public_subnets
+  node_instance_type = var.node_instance_type
+  node_min_size = var.node_min_size
+  node_desired_size = var.node_desired_size
+  node_max_size = var.node_max_size
 }
 
-# S3 for raw data + Airflow configs
-module "s3_data" {
-  source     = "../modules/s3_data"
-  bucket_name = "dev-data-raw"
+# Redshift serverless
+module "redshift" {
+  source = "../../modules/redshift"
+  namespace_name = "${var.org}-${var.env}"
+  workgroup_name = "${var.org}-${var.env}-wg"
+  kms_key_id     = module.kms.kms_key_arn
+  subnet_ids     = module.vpc.private_subnets
+  vpc_id         = module.vpc.vpc_id
+  ingress_from_security_group_ids = [module.eks.cluster_security_group_id]
+  admin_username = var.redshift_admin_username
+  admin_password = var.redshift_admin_password
 }
 
-# Redshift Serverless
-module "redshift_serverless" {
-  source           = "../modules/redshift_serverless"
-  namespace_name   = "dev-namespace"
-  workgroup_name   = "dev-workgroup"
-  subnet_ids       = module.vpc.private_subnets
-  security_group_id = module.eks.cluster_security_group_id
-}
-
-# ECR (for Airflow custom images)
-module "ecr" {
-  source      = "../modules/ecr"
-  repo_name   = "airflow"
-}
-
-# KMS (optional, for S3 encryption + Redshift)
-module "kms" {
-  source      = "../modules/kms"
-  alias_name  = "dev-kms-key"
-}
-
-# IAM/IRSA for Airflow + ExternalSecrets
+# IAM IRSA role for Airflow service account (requires OIDC provider ARN)
 module "iam_irsa" {
-  source       = "../modules/iam_irsa"
-  cluster_name = module.eks.cluster_name
-  namespace    = "airflow"
-  service_account = "airflow-scheduler"
-  s3_bucket_arn   = module.s3_data.bucket_arn
-  redshift_role_arn = module.redshift_serverless.redshift_role_arn
+  source = "../../modules/iam_irsa"
+  name_prefix = "${var.org}-${var.env}-airflow"
+  oidc_provider_arn = aws_iam_openid_connect_provider.eks_oidc.arn
+  namespace = "platform"
+  service_account = "airflow"
+  s3_bucket_arns = [
+    module.s3_data.raw_bucket_arn,
+    module.s3_data.configs_bucket_arn,
+    module.s3_data.airflow_logs_bucket_arn
+  ]
 }
+
+data "tls_certificate" "oidc" {
+  url = module.eks.cluster_oidc_issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks_oidc" {
+  url = module.eks.cluster_oidc_issuer
+  client_id_list = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+}
+
