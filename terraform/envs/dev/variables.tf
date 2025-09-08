@@ -8,17 +8,15 @@ variable "env" {
   default = "dev"
 }
 
+variable "account_id" {
+  type    = string
+  default = "897722700244" # replace with your AWS account ID
+  
+}
+
 variable "org" {
   type    = string
-  default = "yourorg"
-}
-
-variable "account_id" {
-  type = string
-}
-
-variable "tfstate_bucket" {
-  type = string
+  default = "platform-org"
 }
 
 # VPC
@@ -79,6 +77,7 @@ variable "redshift_admin_username" {
 variable "redshift_admin_password" { 
   type = string
   description = "Pass via CI or secrets"
+  default = data.aws_ssm_parameters_by_path.redshift_admin_password.parameters[0].value
 
 }
 
