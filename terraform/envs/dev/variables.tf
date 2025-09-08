@@ -36,11 +36,11 @@ variable "azs" {
 }
 variable "public_subnets_cidrs" {
   type    = list(string)
-  default = ["10.10.0.0/20", "10.10.16.0/20", "10.10.80.0/20"]
+  default = ["10.10.0.0/20", "10.10.16.0/20", "10.10.32.0/20"]
 }
 variable "private_subnets_cidrs" {
   type    = list(string)
-  default = ["10.10.32.0/19", "10.10.64.0/19", "10.10.96.0/19" ]
+  default = ["10.10.48.0/20", "10.10.64.0/20", "10.10.80.0/20"]
 }
 
 # EKS
@@ -50,7 +50,7 @@ variable "cluster_name" {
 }
 variable "node_instance_type" {
   type    = string
-  default = "m6i.large"
+  default = "t3.medium"
 }
 variable "node_min_size" { 
   type = number
