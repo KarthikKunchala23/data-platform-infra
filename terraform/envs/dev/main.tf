@@ -52,7 +52,7 @@ module "redshift" {
   vpc_id         = module.vpc.vpc_id
   ingress_from_security_group_ids = [module.eks.cluster_security_group_id]
   admin_username = var.redshift_admin_username
-  admin_password = var.redshift_admin_password
+  admin_password = data.aws_ssm_parameters_by_path.redshift_admin_password.parameters[0].value
 }
 
 # IAM IRSA role for Airflow service account (requires OIDC provider ARN)

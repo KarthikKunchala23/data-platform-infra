@@ -74,12 +74,6 @@ variable "redshift_admin_username" {
   type = string
   default = "rsadmin" 
 }
-variable "redshift_admin_password" { 
-  type = string
-  description = "Pass via CI or secrets"
-  default = data.aws_ssm_parameters_by_path.redshift_admin_password.parameters[0].value
-
-}
 
 # ECR
 variable "ecr_repo_name" { 
