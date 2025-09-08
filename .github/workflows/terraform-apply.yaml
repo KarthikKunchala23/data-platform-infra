@@ -1,4 +1,4 @@
-name: Terraform
+name: Terraform deploy
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ on:
         default: "dev"
         type: choice
         options:
-          - dev
-          - staging
-          - prod
+            - dev
+            - staging
+            - prod
 
 jobs:
   terraform:
