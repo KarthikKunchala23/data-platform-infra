@@ -52,7 +52,7 @@ module "redshift" {
   vpc_id         = module.vpc.vpc_id
   ingress_from_security_group_ids = [module.eks.cluster_security_group_id]
   admin_username = var.redshift_admin_username
-  admin_password = var.redshift_admin_password
+  admin_password = data.aws_ssm_parameter.redshift_admin_password.value
 }
 
 # IAM IRSA role for Airflow service account (requires OIDC provider ARN)
@@ -77,5 +77,10 @@ resource "aws_iam_openid_connect_provider" "eks_oidc" {
   url = module.eks.cluster_oidc_issuer
   client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+}
+
+data "aws_ssm_parameter" "redshift_admin_password" {
+  name = "/rspasswd"
+  with_decryption = true
 }
 

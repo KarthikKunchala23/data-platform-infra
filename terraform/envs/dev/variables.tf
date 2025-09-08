@@ -8,17 +8,15 @@ variable "env" {
   default = "dev"
 }
 
+variable "account_id" {
+  type    = string
+  default = "897722700244" # replace with your AWS account ID
+  
+}
+
 variable "org" {
   type    = string
-  default = "yourorg"
-}
-
-variable "account_id" {
-  type = string
-}
-
-variable "tfstate_bucket" {
-  type = string
+  default = "platform-org"
 }
 
 # VPC
@@ -36,11 +34,11 @@ variable "azs" {
 }
 variable "public_subnets_cidrs" {
   type    = list(string)
-  default = ["10.10.0.0/20", "10.10.16.0/20", "10.10.80.0/20"]
+  default = ["10.10.0.0/20", "10.10.16.0/20", "10.10.32.0/20"]
 }
 variable "private_subnets_cidrs" {
   type    = list(string)
-  default = ["10.10.32.0/19", "10.10.64.0/19", "10.10.96.0/19" ]
+  default = ["10.10.48.0/20", "10.10.64.0/20", "10.10.80.0/20"]
 }
 
 # EKS
@@ -50,7 +48,7 @@ variable "cluster_name" {
 }
 variable "node_instance_type" {
   type    = string
-  default = "m6i.large"
+  default = "t3.medium"
 }
 variable "node_min_size" { 
   type = number
@@ -75,11 +73,6 @@ variable "s3_prefix" {
 variable "redshift_admin_username" { 
   type = string
   default = "rsadmin" 
-}
-variable "redshift_admin_password" { 
-  type = string
-  description = "Pass via CI or secrets"
-
 }
 
 # ECR
