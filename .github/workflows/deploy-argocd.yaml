@@ -1,39 +1,42 @@
-# .github/workflows/deploy-argocd.yml
-name: Bootstrap Argo CD
+name: Bootstrap ArgoCD
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  bootstrap-argocd:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: us-east-1
 
-      - name: Set up kubectl
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: v1.30.0
+          version: 'v1.29.0'
 
-      - name: Authenticate to cluster
+      - name: Install ArgoCD via Helm
         run: |
-          aws eks update-kubeconfig --name data-plat-eks-dev --region us-east-1
-
-      - name: Debug filesystem
-        run: |
-           pwd
-
-      - name: Create Argo CD namespace
-        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install argocd argo/argo-cd \
+            --namespace argocd \
+            --version 5.51.6 \
+            --set server.service.type=LoadBalancer
 
-      - name: Apply bootstrap Application
+      - name: Wait for ArgoCD CRDs
+        run: |
+          echo "Waiting for ArgoCD CRDs to be available..."
+          kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s
+
+      - name: Apply bootstrap ArgoCD app
         run: |
           kubectl apply -f ${{ github.workspace }}/apps/argocd/bootstrap/argocd-app.yaml -n argocd
