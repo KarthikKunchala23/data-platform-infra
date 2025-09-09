@@ -29,7 +29,6 @@ jobs:
       - name: Debug filesystem
         run: |
            pwd
-           ls - R
 
       - name: Create Argo CD namespace
         run: |
