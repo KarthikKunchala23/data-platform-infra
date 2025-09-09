@@ -1,0 +1,35 @@
+# .github/workflows/deploy-argocd.yml
+name: Bootstrap Argo CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Authenticate to cluster
+        run: |
+          aws eks update-kubeconfig --name data-plat-eks-dev --region us-east-1
+
+      - name: Create Argo CD namespace
+        run: |
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply bootstrap Application
+        run: |
+          kubectl apply -f bootstrap/argocd-app.yaml

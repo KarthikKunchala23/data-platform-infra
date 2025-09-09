@@ -1,0 +1,7 @@
+# charts/argocd/values.yaml
+server:
+  service:
+    type: LoadBalancer   # or ClusterIP + ingress in prod
+configs:
+  cm:
+    url: https://argocd.example.com
