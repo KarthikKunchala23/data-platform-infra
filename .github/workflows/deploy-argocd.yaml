@@ -26,10 +26,15 @@ jobs:
         run: |
           aws eks update-kubeconfig --name data-plat-eks-dev --region us-east-1
 
+      - name: Debug filesystem
+        run: |
+           pwd
+           ls - R
+
       - name: Create Argo CD namespace
         run: |
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Apply bootstrap Application
         run: |
-          kubectl apply -f ../../apps/argocd/bootstrap/argocd-app.yaml -n argocd
+          kubectl apply -f /apps/argocd/bootstrap/argocd-app.yaml -n argocd
