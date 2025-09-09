@@ -48,7 +48,7 @@ variable "cluster_name" {
 }
 variable "node_instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "m6i.large"
 }
 variable "node_min_size" { 
   type = number
