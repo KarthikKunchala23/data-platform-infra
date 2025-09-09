@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KarthikKunchala23/platform.git 
-    targetRevision: feature/airflow-argocd                               # branch name
+    targetRevision: main                             # branch name
     path: apps/argocd/bootstrap                              # directory where Chart.yaml + values.yaml live
     helm:
       releaseName: argocd
