@@ -32,4 +32,4 @@ jobs:
 
       - name: Apply bootstrap Application
         run: |
-          kubectl apply -f bootstrap/argocd-app.yaml
+          kubectl apply -f ../../apps/argocd/bootstrap/argocd-app.yaml -n argocd
