@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://github.com/your-org/platform.git"   # replace
+    repoURL: "https://github.com/KarthikKunchala23/platform.git"   # replace
     targetRevision: main
     path: apps/argocd/apps
   destination:
