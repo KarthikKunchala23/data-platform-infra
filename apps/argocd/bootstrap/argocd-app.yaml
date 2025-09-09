@@ -1,4 +1,3 @@
-# bootstrap/argocd-app.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -7,13 +6,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://argoproj.github.io/argo-helm
-    chart: argo-cd
-    targetRevision: 7.3.11   # pick stable version
+    repoURL: https://github.com/KarthikKunchala23/platform.git 
+    targetRevision: main                             # branch name
+    path: apps/argocd/bootstrap                              # directory where Chart.yaml + values.yaml live
     helm:
       releaseName: argocd
-      valuesFiles:
-        - ../../charts-values/argocd/values.yaml
+      valueFiles:                                     
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
