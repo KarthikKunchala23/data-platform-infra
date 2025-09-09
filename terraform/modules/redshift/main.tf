@@ -4,6 +4,8 @@ resource "aws_redshiftserverless_namespace" "this" {
   admin_username = var.admin_username
   admin_user_password = var.admin_password
   kms_key_id = var.kms_key_id
+
+  iam_roles = [ aws_iam_role.redshift_s3_access.arn ]
 }
 
 resource "aws_redshiftserverless_workgroup" "this" {
