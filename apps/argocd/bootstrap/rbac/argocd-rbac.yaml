@@ -1,0 +1,26 @@
+# Enable a local Argo CD account for GitHub Actions with apiKey capability
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  # This adds a new account called github-actions that can login and generate API tokens
+  accounts.github-actions: login,apiKey
+  accounts.github-actions.enabled: "true"
+---
+# RBAC rules for the github-actions account
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  policy.csv: |
+    # Allow github-actions account to sync ALL applications in the default project
+    p, proj:default, applications, sync, *, allow
+    # Allow github-actions to view apps
+    p, proj:default, applications, get, *, allow
+    # Map the user to role
+    g, github-actions, role:admin
+  scopes: "[groups,accounts]"
