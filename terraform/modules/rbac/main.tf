@@ -10,6 +10,7 @@ resource "kubernetes_manifest" "argocd_cm_patch" {
       "accounts.${var.account_name}"         = var.account_capabilities
       "accounts.${var.account_name}.enabled" = tostring(var.enable_account)
     }
+    apply_strategy = "merge"
   }
 }
 
@@ -25,5 +26,6 @@ resource "kubernetes_manifest" "argocd_rbac_cm_patch" {
       "policy.csv" = var.rbac_policies
       "scopes"     = var.rbac_scopes
     }
+    apply_strategy = "merge"
   }
 }
