@@ -4,7 +4,7 @@ metadata:
   name: airflow
   namespace: argocd
 spec:
-  project: default
+  project: airflow
   source:
     repoURL: https://github.com/KarthikKunchala23/airflow-helm.git   # <-- your repo for airflow chart
     targetRevision: main                                      # branch name
