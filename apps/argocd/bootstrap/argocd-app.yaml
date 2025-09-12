@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/KarthikKunchala23/platform.git 
     targetRevision: main                             # branch name
-    path: apps/argocd/bootstrap                              # directory where Chart.yaml + values.yaml live
+    path: charts-values/argocd                              # directory where Chart.yaml + values.yaml live
     helm:
       releaseName: argocd
       valueFiles:                                     
