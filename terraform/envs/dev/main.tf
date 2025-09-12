@@ -79,6 +79,13 @@ module "argocd_rbac" {
   rbac_scopes      = "role:admin, role:readonly"  
 }
 
+module "airflow" {
+  source            = "../../modules/airflow"
+  name_prefix       = "${var.org}-${var.env}"
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  oidc_provider_url = module.eks.cluster_oidc_issuer
+}
+
 data "tls_certificate" "oidc" {
   url = module.eks.cluster_oidc_issuer
 }
