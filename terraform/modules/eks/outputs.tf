@@ -11,6 +11,13 @@ output "cluster_certificate_authority_data" {
 output "cluster_security_group_id" {
   value = aws_security_group.eks_cluster_sg.id
 }
+
+output "oidc_provider_arn" {
+  description = "ARN of the OIDC provider for the EKS cluster"
+  value       = aws_iam_openid_connect_provider.this.arn
+}
+
 output "cluster_oidc_issuer" {
-  value = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  description = "OIDC issuer URL for the EKS cluster"
+  value       = data.aws_eks_cluster.oidc.identity[0].oidc[0].issuer
 }

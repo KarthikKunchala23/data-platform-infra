@@ -29,11 +29,3 @@ output "airflow_irsa_role_arn" {
 output "airflow_logs_bucket" {
   value = module.airflow.airflow_logs_bucket
 }
-
-output "oidc_provider_arn" {
-  value = aws_iam_openid_connect_provider.eks_oidc.arn
-}
-
-output "cluster_oidc_issuer" {
-  value = data.tls_certificate.oidc.subjects[0].common_name
-}
