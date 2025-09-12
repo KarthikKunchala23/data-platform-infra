@@ -87,3 +87,17 @@ variable "eks_oidc_provider_arn" {
   description = "ARN of IAM OIDC provider for EKS cluster. Create once and pass here for IRSA role creation."
   default     = ""
 }
+
+#RBAC
+variable "rbac_policies" {
+  type        = string
+  description = "CSV-formatted RBAC policies for the account"
+  default = <<EOT
+# Allow the account to sync ALL applications in the default project
+p, proj:default, applications, sync, *, allow
+# Allow the account to view apps
+p, proj:default, applications, get, *, allow
+# Map the account to role
+g, github-actions, role:admin
+EOT
+}
