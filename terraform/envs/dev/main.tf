@@ -69,6 +69,16 @@ module "iam_irsa" {
   ]
 }
 
+module "argocd_rbac" {
+  source = "../../modules/rbac"
+  namespace         = "argocd"
+  account_name      = "admin"
+  account_capabilities = "apiKey,login"
+  enable_account    = true
+  rbac_policies    = var.rbac_policies
+  rbac_scopes      = "role:admin, role:readonly"  
+}
+
 data "tls_certificate" "oidc" {
   url = module.eks.cluster_oidc_issuer
 }
