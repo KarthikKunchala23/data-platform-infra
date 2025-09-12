@@ -43,5 +43,5 @@ jobs:
 
       - name: Apply bootstrap ArgoCD app
         run: |
-          kubectl apply -f ${{ github.workspace }}/apps/argocd/bootstrap/argocd-app.yaml -n argocd
+          kubectl apply -f ${{ github.workspace }}/apps/argocd/* -n argocd
 
