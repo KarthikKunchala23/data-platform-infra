@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KarthikKunchala23/airflow-helm.git   # <-- your repo for airflow chart
+    targetRevision: main                                      # branch name
+    path: charts/airflow                                      # path where Chart.yaml + values.yaml live
+    helm:
+      releaseName: airflow
+      valueFiles:
+        - values.yaml                                         # this file is inside airflow-helm repo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: airflow
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
