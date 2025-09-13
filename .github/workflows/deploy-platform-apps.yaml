@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Application to be deployed(argocd, airflow, alb-controller)"
+        description: "Application to be deployed (argocd, airflow, alb-controller)"
         required: true
-        default: "dev"
+        default: "argocd"
         type: choice
         options:
-            - argocd
-            - airflow
-            - alb-controller
+          - argocd
+          - airflow
+          - alb-controller
   push:
     branches:
       - main
@@ -42,16 +42,29 @@ jobs:
         run: |
           aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
-      - name: Ensure ArgoCD namespace exists
+      #  Only install ArgoCD when deploying argocd
+      - name: Install ArgoCD via Helm (if argocd selected)
+        if: ${{ github.event.inputs.environment == 'argocd' }}
         run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install argocd argo/argo-cd \
+            --namespace argocd \
+            --version 5.51.6 \
+            --set server.service.type=LoadBalancer
 
-      - name: Apply all ArgoCD Projects & Applications
+      #  Wait for CRDs before applying manifests
+      - name: Wait for ArgoCD CRDs
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          echo "Waiting for ArgoCD CRDs..."
+          kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s || true
+          kubectl wait --for=condition=Established crd/appprojects.argoproj.io --timeout=120s || true
+
+      - name: Apply ArgoCD Projects & Applications
         env:
-          ENV: ${{ github.event.inputs.environment }}
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
         run: |
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENV/
-
-      - name: Wait for ArgoCD Server
-        run: |
-          kubectl rollout status deployment/argocd-server -n argocd --timeout=300s || true
+          echo "Deploying ArgoCD apps for: $ENVIRONMENT"
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/
