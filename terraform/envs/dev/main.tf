@@ -69,15 +69,12 @@ module "iam_irsa" {
   ]
 }
 
-module "aws_lb_controller" {
-  source  = "terraform-aws-modules/eks/aws//modules/aws-load-balancer-controller"
-  version = "~> 20.8"
-
-  cluster_name = module.eks.cluster_name
-  subnet_ids = var.public_subnets_cidrs[0] != null ? module.vpc.public_subnets : module.vpc.private_subnets
-  vpc_id = module.vpc.vpc_id
+module "alb_controller" {
+  source            = "../../modules/aws_load_balancer_controller"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_url = module.eks.cluster_oidc_issuer
+  oidc_provider_arn = module.eks.oidc_provider_arn
 }
-
 
 
 data "tls_certificate" "oidc" {
