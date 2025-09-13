@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: airflow
+  namespace: argocd
+spec:
+  description: Project for managing Airflow deployment
+  sourceRepos:
+    - https://github.com/KarthikKunchala23/airflow-helm.git
+  destinations:
+    - namespace: airflow
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

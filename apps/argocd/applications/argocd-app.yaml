@@ -4,7 +4,7 @@ metadata:
   name: argocd-bootstrap
   namespace: argocd
 spec:
-  project: default
+  project: argocd
   source:
     repoURL: https://github.com/KarthikKunchala23/argocd-helm.git  # git repo URL
     targetRevision: main                             # branch name
