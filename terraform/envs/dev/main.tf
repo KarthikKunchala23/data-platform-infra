@@ -74,6 +74,8 @@ module "aws_lb_controller" {
   version = "~> 20.8"
 
   cluster_name = module.eks.cluster_name
+  subnet_ids = var.public_subnets_cidrs[0] != null ? module.vpc.public_subnets : module.vpc.private_subnets
+  vpc_id = module.vpc.vpc_id
 }
 
 
