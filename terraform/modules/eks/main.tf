@@ -84,16 +84,6 @@ data "aws_eks_cluster_auth" "oidc" {
   name = aws_eks_cluster.this.name
 }
 
-data "tls_certificate" "oidc" {
-  url = data.aws_eks_cluster.oidc.identity[0].oidc[0].issuer
-}
-
-resource "aws_iam_openid_connect_provider" "this" {
-  url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
-}
-
 # Node group (managed node group)
 resource "aws_eks_node_group" "default" {
   cluster_name    = aws_eks_cluster.this.name

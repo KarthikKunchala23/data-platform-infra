@@ -70,6 +70,16 @@ module "iam_irsa" {
 }
 
 
+data "tls_certificate" "oidc" {
+  url = module.eks.cluster_oidc_issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks_oidc" {
+  url = module.eks.cluster_oidc_issuer
+  client_id_list = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+}
+
 data "aws_ssm_parameter" "redshift_admin_password" {
   name = "/rspasswd"
   with_decryption = true

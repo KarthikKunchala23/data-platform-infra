@@ -21,11 +21,3 @@ output "ecr_repo_url" {
 output "s3_raw_bucket" {
   value = module.s3_data.raw_bucket_name
 }
-
-output "airflow_irsa_role_arn" {
-  value = module.airflow.airflow_irsa_role_arn
-}
-
-output "airflow_logs_bucket" {
-  value = module.airflow.airflow_logs_bucket
-}
