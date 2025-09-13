@@ -47,8 +47,10 @@ jobs:
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Apply all ArgoCD Projects & Applications
+        env:
+          ENV: ${{ github.event.inputs.environment }}
         run: |
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/{{ github.event.inputs.environment }}/
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENV/
 
       - name: Wait for ArgoCD Server
         run: |
