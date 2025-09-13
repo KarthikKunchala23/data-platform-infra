@@ -69,6 +69,14 @@ module "iam_irsa" {
   ]
 }
 
+module "aws_lb_controller" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-load-balancer-controller"
+  version = "~> 20.8"
+
+  cluster_name = module.eks.cluster_name
+}
+
+
 
 data "tls_certificate" "oidc" {
   url = module.eks.cluster_oidc_issuer

@@ -45,6 +45,12 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
+resource "aws_iam_role_policy_attachment" "lb_controller" {
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+}
+
+
 # Security group for cluster control plane
 resource "aws_security_group" "eks_cluster_sg" {
   name        = "${var.cluster_name}-sg"
