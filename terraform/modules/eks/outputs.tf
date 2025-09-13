@@ -19,6 +19,6 @@ output "cluster_oidc_issuer" {
 
 output "oidc_provider_arn" {
   description = "OIDC provider ARN for the EKS cluster"
-  value       = aws_iam_openid_connect_provider.eks_oidc.arn
+  value       = aws_iam_openid_connect_provider.eks.arn
   
 }
