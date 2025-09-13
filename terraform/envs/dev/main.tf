@@ -69,32 +69,6 @@ module "iam_irsa" {
   ]
 }
 
-module "argocd_rbac" {
-  source = "../../modules/rbac"
-  namespace         = "argocd"
-  account_name      = "admin"
-  account_capabilities = "apiKey,login"
-  enable_account    = true
-  rbac_policies    = var.rbac_policies
-  rbac_scopes      = "role:admin, role:readonly"  
-}
-
-module "airflow" {
-  source            = "../../modules/airflow"
-  name_prefix       = "${var.org}-${var.env}"
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  oidc_provider_url = module.eks.cluster_oidc_issuer
-}
-
-data "tls_certificate" "oidc" {
-  url = module.eks.cluster_oidc_issuer
-}
-
-resource "aws_iam_openid_connect_provider" "eks_oidc" {
-  url = module.eks.cluster_oidc_issuer
-  client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
-}
 
 data "aws_ssm_parameter" "redshift_admin_password" {
   name = "/rspasswd"
