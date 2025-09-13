@@ -2,6 +2,16 @@ name: Deploy Platform Apps via ArgoCD
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Application to be deployed(argocd, airflow, alb-controller)"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+            - argocd
+            - airflow
+            - alb-controller
   push:
     branches:
       - main
@@ -38,7 +48,7 @@ jobs:
 
       - name: Apply all ArgoCD Projects & Applications
         run: |
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/{{ github.event.inputs.environment }}/
 
       - name: Wait for ArgoCD Server
         run: |
