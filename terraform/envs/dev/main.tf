@@ -59,7 +59,7 @@ module "redshift" {
 module "iam_irsa" {
   source = "../../modules/iam_irsa"
   name_prefix = "${var.org}-${var.env}-airflow"
-  oidc_provider_arn = aws_iam_openid_connect_provider.eks_oidc.arn
+  oidc_provider_arn = module.eks.oidc_provider_arn
   namespace = "platform"
   service_account = "airflow"
   s3_bucket_arns = [
@@ -69,24 +69,11 @@ module "iam_irsa" {
   ]
 }
 
-module "argocd_rbac" {
-  source = "../../modules/rbac"
-  namespace         = "argocd"
-  account_name      = "admin"
-  account_capabilities = "apiKey,login"
-  enable_account    = true
-  rbac_policies    = var.rbac_policies
-  rbac_scopes      = "role:admin, role:readonly"  
-}
-
-data "tls_certificate" "oidc" {
-  url = module.eks.cluster_oidc_issuer
-}
-
-resource "aws_iam_openid_connect_provider" "eks_oidc" {
-  url = module.eks.cluster_oidc_issuer
-  client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+module "alb_controller" {
+  source            = "../../modules/aws_load_balancer_controller"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_url = module.eks.cluster_oidc_issuer
+  oidc_provider_arn = module.eks.oidc_provider_arn
 }
 
 data "aws_ssm_parameter" "redshift_admin_password" {

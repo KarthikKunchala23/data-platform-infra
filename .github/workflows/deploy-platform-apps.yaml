@@ -1,16 +1,19 @@
-name: Bootstrap ArgoCD
+name: Deploy Platform Apps via ArgoCD
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  bootstrap-argocd:
+  deploy-platform:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: us-east-1
 
     steps:
-      - name: Checkout repo
+      - name: Checkout infra repo
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
@@ -29,17 +32,14 @@ jobs:
         run: |
           aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
-      - name: Create ArgoCD namespace
+      - name: Ensure ArgoCD namespace exists
         run: |
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Apply ArgoCD Application CR (points to argocd-helm repo)
+      - name: Apply all ArgoCD Projects & Applications
         run: |
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/argocd/applications/
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/
 
-      - name: Wait for ArgoCD to bootstrap itself
+      - name: Wait for ArgoCD Server
         run: |
-          echo "Waiting for ArgoCD pods..."
           kubectl rollout status deployment/argocd-server -n argocd --timeout=300s || true
-          kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=300s || true
-          kubectl rollout status deployment/argocd-application-controller -n argocd --timeout=300s || true

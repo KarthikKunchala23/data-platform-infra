@@ -71,6 +71,28 @@ resource "aws_eks_cluster" "this" {
   ]
 }
 
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+}
+
+data "tls_certificate" "oidc" {
+  url = aws_eks_cluster.this.identity[0].oidc[0].issuer
+}
+
+# -------------------------
+# OIDC Provider for IRSA
+# -------------------------
+
+data "aws_eks_cluster" "oidc" {
+  name = aws_eks_cluster.this.name
+}
+
+data "aws_eks_cluster_auth" "oidc" {
+  name = aws_eks_cluster.this.name
+}
+
 # Node group (managed node group)
 resource "aws_eks_node_group" "default" {
   cluster_name    = aws_eks_cluster.this.name
