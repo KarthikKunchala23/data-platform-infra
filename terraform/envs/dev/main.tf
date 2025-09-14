@@ -107,10 +107,6 @@ resource "aws_security_group_rule" "allow_from_eks_nodes" {
 }
 
 
-
-output "airflow_db_endpoint" {
-  value = module.rds_airflow.endpoint
-}
 data "aws_ssm_parameter" "redshift_admin_password" {
   name = "/rspasswd"
   with_decryption = true
