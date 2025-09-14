@@ -41,6 +41,7 @@ resource "aws_security_group_rule" "rds_egress_all" {
 resource "aws_db_instance" "this" {
   identifier              = var.name
   engine                  = "postgres"
+  db_name                 = var.db_name
   engine_version          = var.engine_version
   instance_class          = var.instance_class
   allocated_storage       = var.allocated_storage

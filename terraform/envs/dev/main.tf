@@ -91,6 +91,7 @@ module "rds" {
 
   name                  = "${var.org}-${var.env}-airflow-db"
   engine_version        = "15.7"
+  db_name               = "airflow"
   instance_class        = "db.t3.medium"
   allocated_storage     = 20
   max_allocated_storage = 100

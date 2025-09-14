@@ -69,3 +69,10 @@ variable "password" {
   type        = string
   
 }
+
+variable "db_name" {
+  description = "Initial database name"
+  type        = string
+  default     = "airflow"
+  
+}
