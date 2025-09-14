@@ -78,6 +78,12 @@ module "alb_controller" {
   oidc_provider_arn = module.eks.oidc_provider_arn
 }
 
+module "ssm_secrets" {
+  source              = "../../modules/ssm"
+  org                 = var.org
+  env                 = var.env
+  airflow_db_password = var.airflow_db_password
+}
 
 # RDS Postgres
 module "rds" {
@@ -94,6 +100,7 @@ module "rds" {
   private_subnet_cidrs  = var.private_subnets_cidrs
   org                   = var.org
   env                   = var.env
+  password              = var.airflow_db_password
 }
 
 # Example: attach other rules referencing RDS SG

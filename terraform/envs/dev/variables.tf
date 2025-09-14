@@ -109,3 +109,9 @@ variable "username" {
   description = "Airflow DB username"
   default     = "airflow"
 }
+
+variable "airflow_db_password" {
+  type        = string
+  description = "Airflow DB password"
+  default     = "ChangeMe123!"
+}

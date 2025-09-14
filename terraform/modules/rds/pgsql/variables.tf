@@ -63,3 +63,9 @@ variable "private_subnet_cidrs" {
   description = "CIDRs of private subnets that should access RDS"
   type        = list(string)
 }
+
+variable "password" {
+  description = "Airflow DB password from SSM"
+  type        = string
+  
+}

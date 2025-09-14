@@ -1,18 +1,3 @@
-# Random password generator (only if you want Terraform to create it)
-resource "random_password" "airflow_db" {
-  length           = 16
-  special          = true
-  override_special = "_%@"
-}
-
-# Store password in SSM
-resource "aws_ssm_parameter" "airflow_db_password" {
-  name        = "/${var.org}/${var.env}/airflow/db-password"
-  description = "Airflow RDS DB password"
-  type        = "SecureString"
-  value       = random_password.airflow_db.result
-}
-
 # RDS subnet group
 resource "aws_db_subnet_group" "this" {
   name       = "${var.name}-subnet-group"
@@ -51,11 +36,6 @@ resource "aws_security_group_rule" "rds_egress_all" {
 }
 
 
-# Fetch password back from SSM (ensures RDS always pulls from SSM)
-data "aws_ssm_parameter" "airflow_db_password" {
-  name           = aws_ssm_parameter.airflow_db_password.name
-  with_decryption = true
-}
 
 # RDS Instance
 resource "aws_db_instance" "this" {
@@ -66,7 +46,7 @@ resource "aws_db_instance" "this" {
   allocated_storage       = var.allocated_storage
   max_allocated_storage   = var.max_allocated_storage
   username                = var.username
-  password                = data.aws_ssm_parameter.airflow_db_password.value
+  password                = var.password
   db_subnet_group_name    = aws_db_subnet_group.this.name
   vpc_security_group_ids  = [aws_security_group.this.id]
   skip_final_snapshot     = true
