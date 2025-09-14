@@ -103,15 +103,6 @@ EOT
 }
 
 # RDS Postgres
-variable "org" {
-  type    = string
-  default = "platform-org"
-}
-
-variable "env" {
-  type    = string
-  default = "dev"
-}
 
 variable "username" {
   type        = string
