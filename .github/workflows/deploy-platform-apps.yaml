@@ -59,7 +59,7 @@ jobs:
         run: |
           kubectl create namespace airflow --dry-run=client -o yaml | kubectl apply -f -
           kubectl -n airflow create secret generic airflow-db-secret \
-            --from-literal=AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="${{ secrets.AIRFLOW_DB_PASSWORD }}" \
+            --from-literal=AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="${{ secrets.AIRFLOW_DB_CONN }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
 
