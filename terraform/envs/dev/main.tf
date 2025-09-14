@@ -72,6 +72,8 @@ module "iam_irsa" {
 module "alb_controller" {
   source            = "../../modules/aws_load_balancer_controller"
   cluster_name      = module.eks.cluster_name
+  vpc_id           = module.vpc.vpc_id
+  region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
   oidc_provider_arn = module.eks.oidc_provider_arn
 }

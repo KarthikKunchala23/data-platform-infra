@@ -18,3 +18,15 @@ variable "service_account_name" {
   description = "Kubernetes service account name for the AWS Load Balancer Controller"
   default     = "aws-load-balancer-controller"
 }
+
+variable "region" {
+  type        = string
+  description = "AWS region where the EKS cluster is deployed"
+  
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID where the EKS cluster is deployed"
+  
+}
