@@ -119,8 +119,3 @@ data "aws_ssm_parameter" "redshift_admin_password" {
   with_decryption = true
 }
 
-data "aws_ssm_parameter" "airflow_db_password" {
-  name = "/${var.org}/${var.env}/airflow/db/password"
-  with_decryption = true
-}
-
