@@ -51,7 +51,7 @@ jobs:
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
           helm upgrade --install argocd argo/argo-cd \
             --namespace argocd \
-            --version 5.51.6 \
+            --version 5.51.5 \
             --set server.service.type=LoadBalancer
 
       #  Wait for CRDs before applying manifests
