@@ -21,3 +21,15 @@ output "ecr_repo_url" {
 output "s3_raw_bucket" {
   value = module.s3_data.raw_bucket_name
 }
+
+output "airflow_rds_endpoint" {
+  value = module.rds.db_endpoint
+}
+
+output "airflow_rds_username" {
+  value = module.rds.db_username
+}
+
+output "airflow_rds_password_ssm" {
+  value = module.rds.db_password_ssm
+}

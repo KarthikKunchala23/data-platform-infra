@@ -78,8 +78,46 @@ module "alb_controller" {
   oidc_provider_arn = module.eks.oidc_provider_arn
 }
 
+
+# RDS Postgres
+module "rds" {
+  source = "../../modules/rds/pgsql"
+
+  name                  = "${var.org}-${var.env}-airflow-db"
+  engine_version        = "15.5"
+  instance_class        = "db.t3.medium"
+  allocated_storage     = 20
+  max_allocated_storage = 100
+  username              = var.username
+  subnet_ids            = module.vpc.private_subnets
+  vpc_id                = module.vpc.vpc_id
+  private_subnet_cidrs  = var.private_subnets_cidrs
+  org                   = var.org
+  env                   = var.env
+}
+
+# Example: attach other rules referencing RDS SG
+resource "aws_security_group_rule" "allow_from_eks_nodes" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = module.eks.cluster_security_group_id
+  security_group_id        = module.rds.security_group_id
+}
+
+
+
+output "airflow_db_endpoint" {
+  value = module.rds_airflow.endpoint
+}
 data "aws_ssm_parameter" "redshift_admin_password" {
   name = "/rspasswd"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "airflow_db_password" {
+  name = "/${var.org}/${var.env}/airflow/db/password"
   with_decryption = true
 }
 
