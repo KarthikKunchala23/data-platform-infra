@@ -54,6 +54,15 @@ jobs:
             --version 5.51.5 \
             --set server.service.type=LoadBalancer
 
+      - name: Create Airflow DB Secret
+        if: ${{ github.event.inputs.environment == 'airflow' }}
+        run: |
+          kubectl create namespace airflow --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n airflow create secret generic airflow-db-secret \
+            --from-literal=AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="${{ secrets.AIRFLOW_DB_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+
       #  Wait for CRDs before applying manifests
       - name: Wait for ArgoCD CRDs
         if: ${{ github.event.inputs.environment == 'argocd' }}
