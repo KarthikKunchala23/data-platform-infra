@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+spec:
+  project: argocd
+  source:
+    repoURL: https://github.com/KarthikKunchala23/argocd-helm.git  # git repo URL
+    targetRevision: main                             # branch name
+    path: charts/argocd                            # directory where Chart.yaml + values.yaml live
+    helm:
+      releaseName: argocd
+      valueFiles:                                     
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
