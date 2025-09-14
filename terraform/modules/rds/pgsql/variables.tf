@@ -39,10 +39,6 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "vpc_security_group_ids" {
-  description = "List of security groups for RDS"
-  type        = list(string)
-}
 
 
 variable "org" {
