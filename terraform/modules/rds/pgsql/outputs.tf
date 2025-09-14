@@ -15,7 +15,7 @@ output "db_username" {
 
 output "db_password_ssm" {
   description = "SSM parameter name for DB password"
-  value       = aws_ssm_parameter.airflow_db_password.name
+  value       = var.password
 }
 
 output "security_group_id" {
