@@ -6,6 +6,9 @@ on:
 jobs:
   bootstrap-argocd:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -15,7 +18,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
@@ -24,24 +27,19 @@ jobs:
 
       - name: Update kubeconfig for EKS
         run: |
-          aws eks update-kubeconfig --name data-plat-eks-dev --region us-east-1
+          aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
-      - name: Install ArgoCD via Helm
+      - name: Create ArgoCD namespace
         run: |
-          helm repo add argo https://argoproj.github.io/argo-helm
-          helm repo update
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-          helm upgrade --install argocd argo/argo-cd \
-            --namespace argocd \
-            --version 5.51.6 \
-            --set server.service.type=LoadBalancer
 
-      - name: Wait for ArgoCD CRDs
+      - name: Apply ArgoCD Application CR (points to argocd-helm repo)
         run: |
-          echo "Waiting for ArgoCD CRDs to be available..."
-          kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/argocd/applications/
 
-      - name: Apply bootstrap ArgoCD app
+      - name: Wait for ArgoCD to bootstrap itself
         run: |
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/argocd/
-
+          echo "Waiting for ArgoCD pods..."
+          kubectl rollout status deployment/argocd-server -n argocd --timeout=300s || true
+          kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=300s || true
+          kubectl rollout status deployment/argocd-application-controller -n argocd --timeout=300s || true

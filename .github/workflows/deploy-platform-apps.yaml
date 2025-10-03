@@ -1,0 +1,79 @@
+name: Deploy Platform Apps via ArgoCD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Application to be deployed (argocd, airflow, alb-controller)"
+        required: true
+        default: "argocd"
+        type: choice
+        options:
+          - argocd
+          - airflow
+          - alb-controller
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-platform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.29.0'
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
+
+      #  Only install ArgoCD when deploying argocd
+      - name: Install ArgoCD via Helm (if argocd selected)
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install argocd argo/argo-cd \
+            --namespace argocd \
+            --version 5.51.5 \
+            --set server.service.type=LoadBalancer
+
+      - name: Create Airflow DB Secret
+        if: ${{ github.event.inputs.environment == 'airflow' }}
+        run: |
+          kubectl create namespace airflow --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n airflow create secret generic airflow-db-secret \
+            --from-literal=AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="${{ secrets.AIRFLOW_DB_CONN }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+
+      #  Wait for CRDs before applying manifests
+      - name: Wait for ArgoCD CRDs
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          echo "Waiting for ArgoCD CRDs..."
+          kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s || true
+          kubectl wait --for=condition=Established crd/appprojects.argoproj.io --timeout=120s || true
+
+      - name: Apply ArgoCD Projects & Applications
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+        run: |
+          echo "Deploying ArgoCD apps for: $ENVIRONMENT"
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/

@@ -6,9 +6,9 @@ metadata:
 spec:
   project: airflow
   source:
-    repoURL: https://github.com/KarthikKunchala23/airflow-helm.git   # <-- your repo for airflow chart
+    repoURL: https://github.com/KarthikKunchala23/airflow-config.git   # <-- your repo for airflow chart
     targetRevision: main                                      # branch name
-    path: charts/airflow                                      # path where Chart.yaml + values.yaml live
+    path: airflow/                                      # path where Chart.yaml + values.yaml live
     helm:
       releaseName: airflow
       valueFiles:
@@ -20,3 +20,5 @@ spec:
     automated:
       selfHeal: true
       prune: true
+    syncOptions:
+      - CreateNamespace=true

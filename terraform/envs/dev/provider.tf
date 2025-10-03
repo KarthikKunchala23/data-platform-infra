@@ -11,6 +11,8 @@ cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_d
 token = data.aws_eks_cluster_auth.this.token
 }
 
+provider "random" {}
+
 
 data "aws_eks_cluster_auth" "this" {
 name = module.eks.cluster_name
