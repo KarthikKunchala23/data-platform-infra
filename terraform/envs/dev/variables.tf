@@ -101,3 +101,17 @@ p, proj:default, applications, get, *, allow
 g, github-actions, role:admin
 EOT
 }
+
+# RDS Postgres
+
+variable "username" {
+  type        = string
+  description = "Airflow DB username"
+  default     = "airflow"
+}
+
+variable "airflow_db_password" {
+  type        = string
+  description = "Airflow DB password"
+  default     = "ChangeMe123!"
+}
