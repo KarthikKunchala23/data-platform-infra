@@ -12,9 +12,6 @@ on:
           - argocd
           - airflow
           - alb-controller
-  push:
-    branches:
-      - main
 
 jobs:
   deploy-platform:
