@@ -14,12 +14,12 @@ spec:
       values: |
         clusterName: data-plat-eks-dev
         region: us-east-1
-        vpcId: vpc-016bb14d26dcb6efc  # replace with your VPC ID
+        vpcId: vpc-030900a8f2871fc34  # replace with your VPC ID
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
           annotations:
-            eks.amazonaws.com/role-arn: arn:aws:iam::897722700244:role/data-plat-eks-dev-alb-controller-role
+            eks.amazonaws.com/role-arn: arn:aws:iam::897722700244:role/eks-alb-controller
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
