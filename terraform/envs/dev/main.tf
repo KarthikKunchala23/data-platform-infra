@@ -76,6 +76,7 @@ module "alb_controller" {
   region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
   oidc_provider_arn = module.eks.oidc_provider_arn
+  eks_oidc_id      = module.eks.oidc_provider_id
 }
 
 module "ssm_secrets" {
