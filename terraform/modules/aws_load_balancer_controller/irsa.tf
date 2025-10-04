@@ -2,7 +2,7 @@
 resource "aws_iam_openid_connect_provider" "eks" {
   url             = "https://oidc.eks.${var.region}.amazonaws.com/id/${var.eks_oidc_id}"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"] # Verify latest thumbprint
+  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"]
 }
 
 # IAM Policy for AWS Load Balancer Controller

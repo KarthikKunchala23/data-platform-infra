@@ -1,5 +1,22 @@
 # Terraform configuration for the dev environment
 # Create VPC
+
+data "aws_caller_identity" "current" {}
+
+locals {
+  oidc_provider_id = replace(
+    module.eks.oidc_provider_arn,
+    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/",
+    ""
+  )
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = "https://oidc.eks.${var.region}.amazonaws.com/id/${local.oidc_provider_id}"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"]
+}
+
 module "vpc" {
   source = "../../modules/vpc"
   name   = var.vpc_name
@@ -76,7 +93,7 @@ module "alb_controller" {
   region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
   oidc_provider_arn = module.eks.oidc_provider_arn
-  eks_oidc_id      = module.eks.oidc_provider_id
+  eks_oidc_id      = local.oidc_provider_id
 }
 
 module "ssm_secrets" {
