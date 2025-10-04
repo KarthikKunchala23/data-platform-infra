@@ -125,5 +125,5 @@ variable "bastion_instance_type" {
 
 variable "bastion_key_name" {
   type    = string
-  default = "" # replace with your EC2 key pair name
+  default = "bastion-key" # replace with your EC2 key pair name
 }
