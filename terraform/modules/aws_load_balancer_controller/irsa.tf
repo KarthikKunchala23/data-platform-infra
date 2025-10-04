@@ -1,14 +1,15 @@
 # ============================================
 # AWS Load Balancer Controller IRSA Setup
 # ============================================
-
-
+data "aws_caller_identity" "account" {
+  
+}
 
 # We expect this to be passed from the EKS module
 # (e.g., module.eks.cluster_oidc_issuer_url)
 locals {
   oidc_provider_url = var.oidc_provider_url
-  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(local.oidc_provider_url, "https://", "")}"
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.account.account_id}:oidc-provider/${replace(local.oidc_provider_url, "https://", "")}"
 }
 
 # Try to fetch existing OIDC provider, but this data source
