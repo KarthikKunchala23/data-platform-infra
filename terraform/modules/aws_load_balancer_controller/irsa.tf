@@ -1,40 +1,26 @@
 # ============================================
 # AWS Load Balancer Controller IRSA Setup
-# Safe for re-runs (skips if OIDC already exists)
 # ============================================
 
-data "aws_caller_identity" "current" {}
-
-# Try to find an existing OIDC provider
-data "aws_iam_openid_connect_provider" "existing" {
-  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(var.oidc_provider_url, "https://", "")}"
+data "tls_certificate" "oidc" {
+  url = var.oidc_provider_url
 }
 
-# If no provider exists, create one
+# Create OIDC provider (safe to reapply, idempotent)
 resource "aws_iam_openid_connect_provider" "eks" {
-  count = local.oidc_provider_exists ? 0 : 1
-
   url             = var.oidc_provider_url
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
 }
 
-locals{
-  oidc_provider_exists = try(data.aws_iam_openid_connect_provider.existing.arn != "", false)
-}
-# Determine the final OIDC provider ARN (either existing or newly created)
-locals {
-  oidc_provider_arn = local.oidc_provider_exists ? data.aws_iam_openid_connect_provider.existing.arn : aws_iam_openid_connect_provider.eks[0].arn
-}
-
-# IAM Policy for AWS Load Balancer Controller
-data "aws_iam_policy_document" "alb_controller" {
+# IAM Role for AWS Load Balancer Controller
+data "aws_iam_policy_document" "alb_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
     principals {
       type        = "Federated"
-      identifiers = [local.oidc_provider_arn]
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
     }
 
     condition {
@@ -47,14 +33,14 @@ data "aws_iam_policy_document" "alb_controller" {
 
 resource "aws_iam_role" "alb_controller" {
   name               = "eks-alb-controller"
-  assume_role_policy = data.aws_iam_policy_document.alb_controller.json
+  assume_role_policy = data.aws_iam_policy_document.alb_assume_role.json
 }
 
+# Attach required IAM policy
 resource "aws_iam_policy" "alb_controller_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
-  description = "IAM policy for AWS Load Balancer Controller"
-  policy      = file("${path.module}/alb-controller-policy.json")
-  
+  description = "IAM Policy for AWS Load Balancer Controller"
+  policy      = file("${path.module}/policies/alb_controller_policy.json")
 }
 
 resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
