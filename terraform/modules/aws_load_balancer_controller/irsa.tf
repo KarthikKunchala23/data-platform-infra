@@ -2,38 +2,39 @@
 # AWS Load Balancer Controller IRSA Setup
 # ============================================
 
-data "tls_certificate" "oidc" {
-  url = var.oidc_provider_url
-}
 
-# Try to look up an existing OIDC provider by ARN
-data "aws_caller_identity" "current" {}
 
+# We expect this to be passed from the EKS module
+# (e.g., module.eks.cluster_oidc_issuer_url)
 locals {
-  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(var.oidc_provider_url, "https://", "")}"
+  oidc_provider_url = var.oidc_provider_url
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(local.oidc_provider_url, "https://", "")}"
 }
 
-# Attempt to fetch existing OIDC provider (ignore if not found)
+# Try to fetch existing OIDC provider, but this data source
+# will fail if it doesn't exist, so we wrap in try() below
 data "aws_iam_openid_connect_provider" "existing" {
   arn = local.oidc_provider_arn
-  # Terraform will ignore this if the provider doesn't exist yet
-  # This keeps the plan deterministic
 }
 
-# Create OIDC provider only if it doesn't exist
+# TLS certificate for thumbprint
+data "tls_certificate" "oidc" {
+  url = local.oidc_provider_url
+}
+
+# Always create OIDC provider if var.create_oidc_provider = true
+# (you can set this flag in variables.tf)
 resource "aws_iam_openid_connect_provider" "eks" {
-  count           = try(length(data.aws_iam_openid_connect_provider.existing.url), 0) > 0 ? 0 : 1
-  url             = var.oidc_provider_url
+  count = var.create_oidc_provider ? 1 : 0
+
+  url             = local.oidc_provider_url
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
 }
 
-# Determine the active OIDC ARN (either existing or just created)
+# Determine active OIDC ARN (existing or created)
 locals {
-  active_oidc_provider_arn = try(
-    data.aws_iam_openid_connect_provider.existing.arn,
-    aws_iam_openid_connect_provider.eks[0].arn
-  )
+  active_oidc_provider_arn = var.create_oidc_provider ? aws_iam_openid_connect_provider.eks[0].arn : local.oidc_provider_arn
 }
 
 # IAM Role Trust Policy for AWS Load Balancer Controller
@@ -48,7 +49,7 @@ data "aws_iam_policy_document" "alb_assume_role" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_url, "https://", "")}:sub"
+      variable = "${replace(local.oidc_provider_url, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
     }
   }

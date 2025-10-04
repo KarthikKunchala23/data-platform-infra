@@ -26,3 +26,10 @@ variable "vpc_id" {
   description = "VPC ID where the EKS cluster is deployed"
   
 }
+
+variable "create_oidc_provider" {
+  type        = bool
+  description = "Whether to create a new OIDC provider for the EKS cluster"
+  default     = true
+  
+}

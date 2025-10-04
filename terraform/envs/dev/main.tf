@@ -79,6 +79,7 @@ module "alb_controller" {
   vpc_id           = module.vpc.vpc_id
   region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
+  create_oidc_provider = true
 }
 
 module "ssm_secrets" {
