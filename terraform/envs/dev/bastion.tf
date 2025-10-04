@@ -1,6 +1,3 @@
-data "aws_caller_identity" "current" {}
-  
-
 data "aws_ami" "ubuntu" {
   most_recent = true
 
