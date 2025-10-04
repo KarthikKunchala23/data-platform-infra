@@ -3,14 +3,6 @@
 
 data "aws_caller_identity" "current" {}
 
-locals {
-  oidc_provider_id = replace(
-    module.eks.oidc_provider_arn,
-    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/",
-    ""
-  )
-}
-
 
 module "vpc" {
   source = "../../modules/vpc"
@@ -87,8 +79,6 @@ module "alb_controller" {
   vpc_id           = module.vpc.vpc_id
   region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  eks_oidc_id      = local.oidc_provider_id
 }
 
 module "ssm_secrets" {
