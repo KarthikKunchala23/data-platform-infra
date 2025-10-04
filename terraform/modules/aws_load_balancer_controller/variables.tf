@@ -8,6 +8,12 @@ variable "oidc_provider_url" {
   description = "OIDC provider URL for EKS cluster"
 }
 
+variable "oidc_provider_arn" {
+  type        = string
+  description = "OIDC provider ARN for EKS cluster"
+  default     = ""
+}
+
 
 variable "service_account_name" {
   type        = string
