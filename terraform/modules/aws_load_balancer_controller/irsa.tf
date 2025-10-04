@@ -12,7 +12,7 @@ data "aws_iam_openid_connect_provider" "existing" {
 
 # If no provider exists, create one
 resource "aws_iam_openid_connect_provider" "eks" {
-  count = can(data.aws_iam_openid_connect_provider.existing.arn) ? 0 : 1
+  count = local.oidc_provider_exists ? 0 : 1
 
   url             = var.oidc_provider_url
   client_id_list  = ["sts.amazonaws.com"]
