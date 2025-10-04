@@ -19,9 +19,12 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"]
 }
 
+locals{
+  oidc_provider_exists = try(data.aws_iam_openid_connect_provider.existing.arn != "", false)
+}
 # Determine the final OIDC provider ARN (either existing or newly created)
 locals {
-  oidc_provider_arn = can(data.aws_iam_openid_connect_provider.existing.arn) ? data.aws_iam_openid_connect_provider.existing.arn : aws_iam_openid_connect_provider.eks[0].arn
+  oidc_provider_arn = local.oidc_provider_exists ? data.aws_iam_openid_connect_provider.existing.arn : aws_iam_openid_connect_provider.eks[0].arn
 }
 
 # IAM Policy for AWS Load Balancer Controller

@@ -11,7 +11,7 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = [data.aws_caller_identity.current] # Canonical
+  owners = ["099720109477"] # Canonical
 }
 
 data "aws_key_pair" "existing" {
