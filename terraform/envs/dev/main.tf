@@ -124,7 +124,7 @@ resource "aws_security_group_rule" "allow_ssh_from_bastion" {
   to_port                  = 443
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.bastion_sg.id
-  security_group_id        = module.eks.cluster_security_group.id
+  security_group_id        = module.eks.cluster_security_group_id
   description              = "Allow SSH from bastion"
 }
 
