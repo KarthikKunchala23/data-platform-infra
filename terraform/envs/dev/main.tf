@@ -11,11 +11,6 @@ locals {
   )
 }
 
-resource "aws_iam_openid_connect_provider" "eks" {
-  url             = "https://oidc.eks.${var.region}.amazonaws.com/id/${local.oidc_provider_id}"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0ecd4e4e3"]
-}
 
 module "vpc" {
   source = "../../modules/vpc"
