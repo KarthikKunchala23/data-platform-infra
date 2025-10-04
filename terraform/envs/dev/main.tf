@@ -117,6 +117,17 @@ resource "aws_security_group_rule" "allow_from_eks_nodes" {
   security_group_id        = module.rds.security_group_id
 }
 
+# Bastion Host
+resource "aws_security_group_rule" "allow_ssh_from_bastion" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion_sg.id
+  security_group_id        = module.eks.security_group_id
+  description              = "Allow SSH from bastion"
+}
+
 
 data "aws_ssm_parameter" "redshift_admin_password" {
   name = "/rspasswd"
