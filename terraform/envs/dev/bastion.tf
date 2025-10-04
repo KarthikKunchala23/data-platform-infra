@@ -11,7 +11,11 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners = [data.aws_caller_identity.current] # Canonical
+}
+
+data "aws_key_pair" "existing" {
+  key_name = "argo" # Replace with the name of your existing EC2 key pair
 }
 
 resource "aws_security_group" "bastion_sg" {
@@ -39,7 +43,7 @@ resource "aws_instance" "bastion_host"{
     instance_type               = var.bastion_instance_type
     subnet_id                   = var.public_subnets_cidrs[0]
     vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
-    key_name                    = var.bastion_key_name
+    key_name                    = data.aws_key_pair.existing.key_name
     associate_public_ip_address = true
     
     tags = {

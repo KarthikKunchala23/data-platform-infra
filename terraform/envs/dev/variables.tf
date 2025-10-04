@@ -122,8 +122,3 @@ variable "bastion_instance_type" {
   type    = string
   default = "t3.medium"
 }   
-
-variable "bastion_key_name" {
-  type    = string
-  default = "bastion-key" # replace with your EC2 key pair name
-}
