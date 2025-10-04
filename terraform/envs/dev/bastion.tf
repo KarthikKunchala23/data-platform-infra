@@ -45,6 +45,7 @@ resource "aws_instance" "bastion_host"{
     vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
     key_name                    = data.aws_key_pair.existing.key_name
     associate_public_ip_address = true
+    user_data                   = file("${path.module}/user-data.sh")
     
     tags = {
         Name        = "bastion-host"
