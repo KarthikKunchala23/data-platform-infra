@@ -115,3 +115,10 @@ variable "airflow_db_password" {
   description = "Airflow DB password"
   default     = "ChangeMe123!"
 }
+
+# Bastion Host
+
+variable "bastion_instance_type" {
+  type    = string
+  default = "t3.medium"
+}   

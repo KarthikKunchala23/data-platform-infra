@@ -1,5 +1,9 @@
 # Terraform configuration for the dev environment
 # Create VPC
+
+data "aws_caller_identity" "current" {}
+
+
 module "vpc" {
   source = "../../modules/vpc"
   name   = var.vpc_name
@@ -75,7 +79,7 @@ module "alb_controller" {
   vpc_id           = module.vpc.vpc_id
   region           = var.region
   oidc_provider_url = module.eks.cluster_oidc_issuer
-  oidc_provider_arn = module.eks.oidc_provider_arn
+  create_oidc_provider = true
 }
 
 module "ssm_secrets" {
@@ -112,6 +116,17 @@ resource "aws_security_group_rule" "allow_from_eks_nodes" {
   protocol                 = "tcp"
   source_security_group_id = module.eks.cluster_security_group_id
   security_group_id        = module.rds.security_group_id
+}
+
+# Bastion Host
+resource "aws_security_group_rule" "allow_ssh_from_bastion" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion_sg.id
+  security_group_id        = module.eks.cluster_security_group_id
+  description              = "Allow SSH from bastion"
 }
 
 

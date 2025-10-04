@@ -8,10 +8,6 @@ variable "oidc_provider_url" {
   description = "OIDC provider URL for EKS cluster"
 }
 
-variable "oidc_provider_arn" {
-  type        = string
-  description = "OIDC provider ARN for EKS cluster"
-}
 
 variable "service_account_name" {
   type        = string
@@ -28,5 +24,12 @@ variable "region" {
 variable "vpc_id" {
   type        = string
   description = "VPC ID where the EKS cluster is deployed"
+  
+}
+
+variable "create_oidc_provider" {
+  type        = bool
+  description = "Whether to create a new OIDC provider for the EKS cluster"
+  default     = true
   
 }
