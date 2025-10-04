@@ -21,7 +21,7 @@ data "aws_key_pair" "existing" {
 resource "aws_security_group" "bastion_sg" {
   name        = "bastion-sg"
   description = "Security group for bastion host"
-  vpc_id      = var.vpc_cidr
+  vpc_id      = module.vpc.vpc_id
 
   ingress {
     from_port   = 22
@@ -41,7 +41,7 @@ resource "aws_security_group" "bastion_sg" {
 resource "aws_instance" "bastion_host"{
     ami                         = data.aws_ami.ubuntu.id
     instance_type               = var.bastion_instance_type
-    subnet_id                   = var.public_subnets_cidrs[0]
+    subnet_id                   = module.vpc.public_subnets[0]
     vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
     key_name                    = data.aws_key_pair.existing.key_name
     associate_public_ip_address = true
