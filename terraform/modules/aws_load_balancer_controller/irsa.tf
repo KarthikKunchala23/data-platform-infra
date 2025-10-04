@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "alb_assume_role" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn,  "arn:aws:iam::[0-9]+:oidc-provider/", "")}:sub"
+      variable = "${replace(var.oidc_provider_url,  "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
     }
   }
