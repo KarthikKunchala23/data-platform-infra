@@ -74,4 +74,4 @@ jobs:
           ENVIRONMENT: ${{ github.event.inputs.environment }}
         run: |
           echo "Deploying ArgoCD apps for: $ENVIRONMENT"
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/*
