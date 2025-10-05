@@ -39,6 +39,11 @@ jobs:
         run: |
           aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
+      - name: Ensure ArgoCD namespace exists
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+
       #  Only install ArgoCD when deploying argocd
       - name: Install ArgoCD CRDs
         if: ${{ github.event.inputs.environment == 'argocd' }}
