@@ -69,9 +69,16 @@ jobs:
           kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s || true
           kubectl wait --for=condition=Established crd/appprojects.argoproj.io --timeout=120s || true
 
+      - name: Bootstrap ArgoCD core
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.2/manifests/install.yaml
+
+
       - name: Apply ArgoCD Projects & Applications
         env:
           ENVIRONMENT: ${{ github.event.inputs.environment }}
         run: |
           echo "Deploying ArgoCD apps for: $ENVIRONMENT"
-          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/*
+          kubectl apply -n argocd -R -f ${{ github.workspace }}/apps/$ENVIRONMENT/
