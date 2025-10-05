@@ -40,16 +40,11 @@ jobs:
           aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
       #  Only install ArgoCD when deploying argocd
-      - name: Install ArgoCD via Helm (if argocd selected)
+      - name: Install ArgoCD CRDs
         if: ${{ github.event.inputs.environment == 'argocd' }}
         run: |
-          helm repo add argo https://argoproj.github.io/argo-helm
-          helm repo update
-          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-          helm upgrade --install argocd argo/argo-cd \
-            --namespace argocd \
-            --version 5.51.5 \
-            --set server.service.type=LoadBalancer
+          echo "Applying ArgoCD CRDs only..."
+          kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/crds.yaml
 
       - name: Create Airflow DB Secret
         if: ${{ github.event.inputs.environment == 'airflow' }}
