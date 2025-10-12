@@ -21,18 +21,27 @@ aws --version
 # Install kubectl (latest stable)
 # --------------------------------------------------
 echo "=== Installing kubectl ==="
-KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update -y
+sudo apt-get install -y kubectl
 kubectl version --client --short
 
 # --------------------------------------------------
 # Install k9s (latest release)
 # --------------------------------------------------
 echo "=== Installing k9s ==="
-LATEST_K9S=$(curl -s https://api.github.com/repos/derailed/k9s/releases/latest | jq -r .tag_name)
-curl -Lo k9s_Linux_amd64.tar.gz "https://github.com/derailed/k9s/releases/download/${LATEST_K9S}/k9s_Linux_amd64.tar.gz"
-tar -xzf k9s_Linux_amd64.tar.gz
+# Get the latest version
+K9S_VERSION=$(curl -s https://api.github.com/repos/derailed/k9s/releases/latest | grep tag_name | cut -d '"' -f 4)
+
+# Download and extract
+curl -L -o k9s.tar.gz https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz
+tar -xzf k9s.tar.gz
+
+# Move binary to PATH
 sudo mv k9s /usr/local/bin/
 k9s version
 
@@ -59,4 +68,4 @@ EOF
 chown ubuntu:ubuntu /home/ubuntu/.bashrc
 rm -rf /tmp/awscliv2.zip /tmp/aws
 
-echo "✅ Setup complete: AWS CLI, kubectl, and k9s installed."
+echo "Setup complete: AWS CLI, kubectl, and k9s installed."
