@@ -68,5 +68,4 @@ EOF
 chown ubuntu:ubuntu /home/ubuntu/.bashrc
 rm -rf /tmp/awscliv2.zip /tmp/aws
 
-
 echo "Setup complete: AWS CLI, kubectl, and k9s installed."

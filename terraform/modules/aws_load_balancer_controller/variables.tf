@@ -15,8 +15,6 @@ variable "oidc_provider_arn" {
   default     = ""
 }
 
-
-
 variable "service_account_name" {
   type        = string
   description = "Kubernetes service account name for the AWS Load Balancer Controller"
