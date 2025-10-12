@@ -9,6 +9,14 @@ variable "oidc_provider_url" {
 }
 
 
+variable "oidc_provider_arn" {
+  type        = string
+  description = "OIDC provider ARN for EKS cluster"
+  default     = ""
+}
+
+
+
 variable "service_account_name" {
   type        = string
   description = "Kubernetes service account name for the AWS Load Balancer Controller"

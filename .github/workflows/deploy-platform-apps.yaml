@@ -39,17 +39,18 @@ jobs:
         run: |
           aws eks update-kubeconfig --name data-plat-eks-dev --region ${{ env.AWS_REGION }}
 
-      #  Only install ArgoCD when deploying argocd
-      - name: Install ArgoCD via Helm (if argocd selected)
+      - name: Ensure ArgoCD namespace exists
         if: ${{ github.event.inputs.environment == 'argocd' }}
         run: |
-          helm repo add argo https://argoproj.github.io/argo-helm
-          helm repo update
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-          helm upgrade --install argocd argo/argo-cd \
-            --namespace argocd \
-            --version 5.51.5 \
-            --set server.service.type=LoadBalancer
+
+      #  Only install ArgoCD when deploying argocd
+      - name: Install ArgoCD CRDs
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          echo "Applying ArgoCD CRDs only..."
+          kubectl apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=v2.11.2"
+
 
       - name: Create Airflow DB Secret
         if: ${{ github.event.inputs.environment == 'airflow' }}
@@ -67,6 +68,13 @@ jobs:
           echo "Waiting for ArgoCD CRDs..."
           kubectl wait --for=condition=Established crd/applications.argoproj.io --timeout=120s || true
           kubectl wait --for=condition=Established crd/appprojects.argoproj.io --timeout=120s || true
+
+      - name: Bootstrap ArgoCD core
+        if: ${{ github.event.inputs.environment == 'argocd' }}
+        run: |
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.2/manifests/install.yaml
+
 
       - name: Apply ArgoCD Projects & Applications
         env:
