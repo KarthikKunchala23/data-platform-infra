@@ -2,6 +2,7 @@
 # AWS Load Balancer Controller IRSA Setup
 # ============================================
 
+
 # IAM Role Trust Policy for AWS Load Balancer Controller
 data "aws_iam_policy_document" "alb_assume_role" {
   statement {
