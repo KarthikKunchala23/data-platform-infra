@@ -28,7 +28,7 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update -y
 sudo apt-get install -y kubectl
-kubectl version --client --short
+kubectl version --client
 
 # --------------------------------------------------
 # Install k9s (latest release)
