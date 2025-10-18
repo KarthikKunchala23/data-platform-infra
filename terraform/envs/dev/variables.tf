@@ -113,7 +113,6 @@ variable "username" {
 variable "airflow_db_password" {
   type        = string
   description = "Airflow DB password"
-  default     = "ChangeMe123!"
 }
 
 # Bastion Host
