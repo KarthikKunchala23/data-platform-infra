@@ -3,7 +3,6 @@
     "Statement": [
         {
             "Effect": "Allow",
-            "sid": "EBSCSIDriverPolicy",
             "Action": [
                 "ec2:CreateSnapshot",
                 "ec2:AttachVolume",
