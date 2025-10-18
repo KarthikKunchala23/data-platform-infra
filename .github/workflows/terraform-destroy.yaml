@@ -45,4 +45,4 @@ jobs:
       - name: Terraform destroy
         if: github.event_name == 'workflow_dispatch'
         working-directory: terraform/envs/${{ github.event.inputs.environment }}
-        run: terraform destroy -auto-approve
+        run: terraform destroy -auto-approve -var="airflow_db_password=${{ secrets.AIRFLOW_DB_PASSWORD }}"
