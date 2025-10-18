@@ -104,7 +104,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
   depends_on = [
     aws_iam_role.eks_addons,
-    aws_iam_policy_attachment.ebs_csi_driver_attachment,
+    aws_iam_policy_attachment.ebs_csi_driver_attach,
     aws_eks_cluster.this
   ]
 }
