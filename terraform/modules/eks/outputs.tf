@@ -22,3 +22,8 @@ output "oidc_provider_arn" {
   value       = aws_iam_openid_connect_provider.eks.arn
   
 }
+
+output "oidc_provider_url" {
+  description = "OIDC provider URL for the EKS cluster"
+  value = aws_iam_openid_connect_provider.eks.url
+}
