@@ -40,4 +40,4 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform/envs/dev
-        run: terraform plan -out=tfplan -input=false
+        run: terraform plan -out=tfplan -input=false -var="airflow_db_password=${{ secrets.AIRFLOW_DB_PASSWORD }}"
