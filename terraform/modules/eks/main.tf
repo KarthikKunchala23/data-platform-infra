@@ -87,7 +87,7 @@ data "aws_eks_addon_version" "ebs_csi" {
 }
 resource "aws_eks_addon" "ebs_csi_driver" {
   cluster_name = aws_eks_cluster.this.name
-  addon_version = data.aws_eks_addon_version.ebs_csi.addon_version
+  addon_version = data.aws_eks_addon_version.ebs_csi.version
   addon_name   = "aws-ebs-csi-driver"
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "PRESERVE"
