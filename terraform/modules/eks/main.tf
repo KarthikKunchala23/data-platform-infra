@@ -3,19 +3,26 @@ resource "aws_security_group" "eks_cluster_sg" {
   name        = "${var.cluster_name}-sg"
   vpc_id      = var.vpc_id
   description = "EKS cluster security group"
+
+  ingress {
+    description              = "Allow all inbound traffic from worker nodes to control plane"
+    from_port                = 0
+    to_port                  = 0
+    protocol                 = "-1"
+    self                     = true
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = { Name = "${var.cluster_name}-sg" }
 }
 
-resource "aws_security_group_rule" "eks_cluster_sg_inbound" {
-  description              = "Allow all inbound traffic from worker nodes to control plane"
-  type                     = "ingress"
-  from_port                = 0
-  to_port                  = 0
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.eks_cluster_sg.id
-  source_security_group_id = aws_security_group.eks_cluster_sg.id
-  
-}
 # EKS Cluster
 resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
