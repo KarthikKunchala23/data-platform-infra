@@ -44,6 +44,7 @@ module "eks" {
   node_min_size = var.node_min_size
   node_desired_size = var.node_desired_size
   node_max_size = var.node_max_size
+  eks_cluster_sg = "${var.cluster_name}-${var.eks_cluster_sg}"
 }
 
 # Redshift serverless

@@ -63,6 +63,10 @@ variable "node_max_size" {
   default = 3
 }
 
+variable "eks_cluster_sg" {
+  type = string
+  default = "cluster-sg"
+}
 # S3
 variable "s3_prefix" {
   type    = string
