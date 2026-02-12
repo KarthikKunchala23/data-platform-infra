@@ -10,5 +10,5 @@ variable "oidc_provider_arn" {
 
 variable "oidc_provider_url" {
   type        = string
-  description = "OIDC provider URL (issuer) for EKS cluster"
+  description = "OIDC provider URL (issuer) for EKS"
 }
